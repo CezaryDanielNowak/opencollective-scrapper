@@ -21,19 +21,60 @@
 	<div id="root"></div>
 	
 	<div id="drop_zone">
-	  <p>Drag JSON file here</p>
+		<p>Drag JSON file here</p>
 	</div>
 
 	<script>
+		function parseData(inputData) {
+			const outputData = inputData.map((row) => {
+
+				const amountGross = (row.stats.totalAmountReceived.valueInCents / 100);
+				const amountSpent = (row.stats.totalAmountSpent.valueInCents / 100);
+
+				return [
+					/* name */ [row.name, row.slug],
+					/* backers */ row.backers.totalCount,
+					/* location */ row.location.country,
+					/* gross */ amountGross,
+					/* net */ amountGross - Math.abs(amountSpent),
+					/* currency */ row.stats.totalAmountReceived.currency,
+				];
+			});
+
+			return {
+				columns: [
+					{
+						name: 'Name',
+						formatter: nameFormatter,
+						width: '25%',
+					},
+					'Backers',
+					'Location',
+					{ 
+						name: 'Gross amount',
+						sort: numberSort,
+						formatter: currencyFormatter,
+					},
+					{ 
+						name: 'Net amount',
+						sort: numberSort,
+						formatter: currencyFormatter,
+					},
+					'Currency'
+				],
+				data: outputData,
+			};
+		}
+
+
 		function renderData(data) {
 			const grid = new gridjs.Grid({
-				columns: ['Name', 'Email', 'Phone Number'],
 				sort: true,
 				search: true,
-				data: [
-					['John', 'john@example.com', '(353) 01 222 3333'],
-					['Mark', 'mark@gmail.com',   '(01) 22 888 4444']
-				]
+				pagination: {
+					limit: 200,
+				},
+				...parseData(data)
 			}).render(root);
 		}
 
@@ -48,7 +89,7 @@
 
 			var reader = new FileReader();
 
-			reader.onload = function({ currentTarget }) {
+			reader.onload = ({ currentTarget }) => {
 				const data = JSON.parse(currentTarget.result);
 
 				renderData(data);
@@ -58,14 +99,36 @@
 			reader.readAsText(file); // start reading the file data.
 		}
 
+		function numberSort(a, b) {
+			// by default sort uses strings.
+			// Here we compare actual value.
+			if (a > b) {
+				return 1;
+			} else if (b > a) {
+				return -1;
+			} else {
+				return 0;
+			}
+		}
+
+		function currencyFormatter(value) {
+			return new Intl.NumberFormat().format(value);
+		}
+
+		function nameFormatter([name, slug]) {
+			return gridjs.html(`<a href="https://opencollective.com/${slug}" target="_blank">${name}</a>`);
+		}
+
+
 		drop_zone.addEventListener('drop', handleDrop);
 		drop_zone.addEventListener('dragend', handleDrop);
 		drop_zone.addEventListener('dragleave', handleDrop);
-		drop_zone.addEventListener('dragover', function(e) {
-		    e.stopPropagation();
-		    e.preventDefault();
-		    e.dataTransfer.dropEffect = 'copy';
+		drop_zone.addEventListener('dragover', (e) => {
+			e.stopPropagation();
+			e.preventDefault();
+			e.dataTransfer.dropEffect = 'copy';
 		});
+
 	</script>
 </body>
 </html>
