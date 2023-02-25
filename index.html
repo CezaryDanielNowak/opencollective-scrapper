@@ -6,7 +6,7 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/gridjs/6.0.6/gridjs.production.min.js" integrity="sha512-wpiJjuL800CTEBA0QFs+RFw0tFtpXnQGea1p9S16WcYNXC1F3U0l1L7FQrDC3ihkYRtOj4Td7lKR3mYKxrwMMA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 	<style>
-		#drop_zone {
+		#dropZoneNode {
 			height: 100vh;
 			left: 0;
 			line-height: 100vh;
@@ -18,29 +18,14 @@
 	</style>
 </head>
 <body>
-	<div id="root"></div>
+	<div id="rootNode"></div>
 	
-	<div id="drop_zone">
+	<div id="dropZoneNode">
 		<p>Drag JSON file here</p>
 	</div>
 
 	<script>
 		function parseData(inputData) {
-			const outputData = inputData.map((row) => {
-
-				const amountGross = (row.stats.totalAmountReceived.valueInCents / 100);
-				const amountSpent = (row.stats.totalAmountSpent.valueInCents / 100);
-
-				return [
-					/* name */ [row.name, row.slug],
-					/* backers */ row.backers.totalCount,
-					/* location */ row.location.country,
-					/* gross */ amountGross,
-					/* net */ amountGross - Math.abs(amountSpent),
-					/* currency */ row.stats.totalAmountReceived.currency,
-				];
-			});
-
 			return {
 				columns: [
 					{
@@ -62,20 +47,31 @@
 					},
 					'Currency'
 				],
-				data: outputData,
+				data: inputData.map((row) => {
+					const amountGross = (row.stats.totalAmountReceived.valueInCents / 100);
+					const amountSpent = (row.stats.totalAmountSpent.valueInCents / 100);
+
+					return [
+						/* name */ [row.name, row.slug],
+						/* backers */ row.backers.totalCount,
+						/* location */ row.location.country,
+						/* gross */ amountGross,
+						/* net */ amountGross - Math.abs(amountSpent),
+						/* currency */ row.stats.totalAmountReceived.currency,
+					];
+				}),
 			};
 		}
 
-
 		function renderData(data) {
-			const grid = new gridjs.Grid({
+			new gridjs.Grid({
 				sort: true,
 				search: true,
 				pagination: {
 					limit: 200,
 				},
 				...parseData(data)
-			}).render(root);
+			}).render(rootNode);
 		}
 
 		function handleDrop(e) {
@@ -93,8 +89,8 @@
 				const data = JSON.parse(currentTarget.result);
 
 				renderData(data);
-				drop_zone.remove();
-			}
+				dropZoneNode.remove();
+			};
 
 			reader.readAsText(file); // start reading the file data.
 		}
@@ -119,10 +115,10 @@
 			return gridjs.html(`<a href="https://opencollective.com/${slug}" target="_blank">${name}</a>`);
 		}
 
-		drop_zone.addEventListener('drop', handleDrop);
-		drop_zone.addEventListener('dragend', handleDrop);
-		drop_zone.addEventListener('dragleave', handleDrop);
-		drop_zone.addEventListener('dragover', (e) => {
+		dropZoneNode.addEventListener('drop', handleDrop);
+		dropZoneNode.addEventListener('dragend', handleDrop);
+		dropZoneNode.addEventListener('dragleave', handleDrop);
+		dropZoneNode.addEventListener('dragover', (e) => {
 			e.stopPropagation();
 			e.preventDefault();
 			e.dataTransfer.dropEffect = 'copy';

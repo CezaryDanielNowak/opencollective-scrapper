@@ -1,5 +1,4 @@
 const https = require('https');
-const fs = require('fs');
 
 const options = {
   'method': 'POST',
@@ -69,4 +68,4 @@ module.exports = function getSearchResults(offset, limit = 50) {
 
     req.end();
   });
-}
+};

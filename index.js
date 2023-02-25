@@ -1,8 +1,7 @@
-fs = require('fs');
+const fs = require('fs');
 const getSearchResults = require('./src/getSearchResult');
 
 async function run({ logger, resultsPerPage, offset }) {
-  const allAccounts = [];
   let i = offset;
 
   while (true) {
