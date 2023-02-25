@@ -47,7 +47,6 @@ run({
   // remove duplicates
   output = [...new Map(output.map((item) => [JSON.stringify(item), item])).values()];
 
-
   fs.writeFileSync(
     fileName,
     JSON.stringify(output, null, 2),
