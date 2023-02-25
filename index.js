@@ -35,7 +35,7 @@ run({
   logger: console.log.bind(console, '[LOG] '),
   offset: 0,
   resultsPerPage: 50,
-}).then(async() => {
+}).then(async () => {
   const contentArr = await readFiles('tmp/', '.json');
   const fileName = `accounts ${new Date().toISOString().split('T')[0]}.json`;
 
@@ -55,7 +55,6 @@ run({
 
   console.log(`Output file "${fileName}" created.`);
 });
-
 
 /**
  * readFiles reads content of all files from provided directory.
@@ -96,5 +95,3 @@ function readFiles(dirName, extension = false) {
     });
   });
 }
-
-
